@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
+import axios from "axios";
 
-function FaceDetection() {
+function FaceDetection({ Songs, setSongs }) {
   const videoRef = useRef(null);
   const [expression, setExpression] = useState("");
 
@@ -43,39 +44,37 @@ function FaceDetection() {
         const bestMatch = Object.keys(expressions).reduce((a, b) =>
           expressions[a] > expressions[b] ? a : b
         );
+
         setExpression(bestMatch);
+
+        // axios call ekhane bestMatch use korbo
+        axios
+          .get(`http://localhost:3000/songs?mood=${bestMatch}`)
+          .then((response) => {
+            setSongs(response.data.songs);
+          })
+          .catch((err) => console.error("Error fetching songs:", err));
       } else {
-        setExpression("No face detected 😅");
+        setExpression("No face detected 😥");
       }
     }
   };
 
   return (
-    <div style={{ textAlign: "center" }}>
+    <div className="flex md:flex-row flex-col gap-5 items-center">
       <video
         ref={videoRef}
         autoPlay
         muted
-        width="400"
-        height="300"
-        style={{ border: "2px solid black", marginBottom: "10px" }}
+        className="h-50 aspect-auto object-cover rounded-2xl"
       />
-      <br />
       <button
         onClick={detectExpression}
-        style={{
-          padding: "10px 20px",
-          borderRadius: "8px",
-          backgroundColor: "#4caf50",
-          color: "white",
-          border: "none",
-          cursor: "pointer",
-          fontSize: "16px",
-        }}
+        className="py-2 px-5 bg-[#333] rounded-xl cursor-pointer hover:bg-[#444] active:scale-95 transition-all duration-150"
       >
         Detect Expression
       </button>
-      <h2 style={{ marginTop: "15px" }}>
+      <h2>
         {expression
           ? `Detected Expression: ${expression}`
           : "Click the button to detect face expression"}
