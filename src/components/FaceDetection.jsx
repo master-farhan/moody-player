@@ -9,7 +9,7 @@ function FaceDetection({ Songs, setSongs }) {
 
   useEffect(() => {
     const loadModels = async () => {
-      const MODEL_URL = process.env.PUBLIC_URL + "/models"; // ✅ safer in CRA/Vite
+      const MODEL_URL = "/models";
       await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
@@ -46,17 +46,14 @@ function FaceDetection({ Songs, setSongs }) {
 
       setExpression(bestMatch);
 
-      try {
-        setLoading(true);
-        const response = await axios.get(
+      axios
+        .get(
           `https://moody-player-backend-2-73os.onrender.com/songs?mood=${bestMatch}`
-        );
-        setSongs(response.data.songs);
-      } catch (err) {
-        console.error("Error fetching songs:", err);
-      } finally {
-        setLoading(false);
-      }
+        )
+        .then((response) => {
+          setSongs(response.data.songs);
+        })
+        .catch((err) => console.error("Error fetching songs:", err));
     } else {
       setExpression("No face detected 😥");
     }
