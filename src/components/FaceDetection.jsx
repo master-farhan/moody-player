@@ -5,23 +5,25 @@ import axios from "axios";
 function FaceDetection({ Songs, setSongs }) {
   const videoRef = useRef(null);
   const [expression, setExpression] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Load models
     const loadModels = async () => {
-      const MODEL_URL = "/models";
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-
+      const MODEL_URL = process.env.PUBLIC_URL + "/models"; // ✅ safer in CRA/Vite
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+      ]);
       startVideo();
     };
 
-    // Start webcam
     const startVideo = () => {
       navigator.mediaDevices
         .getUserMedia({ video: true })
         .then((stream) => {
-          videoRef.current.srcObject = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
         })
         .catch((err) => console.error("Camera error:", err));
     };
@@ -29,34 +31,34 @@ function FaceDetection({ Songs, setSongs }) {
     loadModels();
   }, []);
 
-  // Detect expression when button is clicked
   const detectExpression = async () => {
-    if (videoRef.current) {
-      const detection = await faceapi
-        .detectSingleFace(
-          videoRef.current,
-          new faceapi.TinyFaceDetectorOptions()
-        )
-        .withFaceExpressions();
+    if (!videoRef.current) return;
 
-      if (detection && detection.expressions) {
-        const expressions = detection.expressions;
-        const bestMatch = Object.keys(expressions).reduce((a, b) =>
-          expressions[a] > expressions[b] ? a : b
+    const detection = await faceapi
+      .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+      .withFaceExpressions();
+
+    if (detection?.expressions) {
+      const expressions = detection.expressions;
+      const bestMatch = Object.keys(expressions).reduce((a, b) =>
+        expressions[a] > expressions[b] ? a : b
+      );
+
+      setExpression(bestMatch);
+
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `https://moody-player-backend-2-73os.onrender.com/songs?mood=${bestMatch}`
         );
-
-        setExpression(bestMatch);
-
-        // axios call ekhane bestMatch use korbo
-        axios
-          .get(`https://moody-player-backend-2-73os.onrender.com/songs?mood=${bestMatch}`)
-          .then((response) => {
-            setSongs(response.data.songs);
-          })
-          .catch((err) => console.error("Error fetching songs:", err));
-      } else {
-        setExpression("No face detected 😥");
+        setSongs(response.data.songs);
+      } catch (err) {
+        console.error("Error fetching songs:", err);
+      } finally {
+        setLoading(false);
       }
+    } else {
+      setExpression("No face detected 😥");
     }
   };
 
@@ -72,7 +74,7 @@ function FaceDetection({ Songs, setSongs }) {
         onClick={detectExpression}
         className="py-2 px-5 bg-[#333] rounded-xl cursor-pointer hover:bg-[#444] active:scale-95 transition-all duration-150"
       >
-        Detect Expression
+        {loading ? "Fetching songs..." : "Detect Expression"}
       </button>
       <h2>
         {expression
