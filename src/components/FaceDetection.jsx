@@ -49,7 +49,7 @@ function FaceDetection({ Songs, setSongs }) {
 
         // axios call ekhane bestMatch use korbo
         axios
-          .get(`http://localhost:3000/songs?mood=${bestMatch}`)
+          .get(`https://moody-player-backend-2-73os.onrender.com/songs?mood=${bestMatch}`)
           .then((response) => {
             setSongs(response.data.songs);
           })
