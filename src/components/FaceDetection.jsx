@@ -65,19 +65,14 @@ function FaceDetection({ Songs, setSongs }) {
         ref={videoRef}
         autoPlay
         muted
-        className="h-50 aspect-auto object-cover rounded-2xl"
+        className="h-50 aspect-auto object-cover rounded-2xl border-4 border-primary"
       />
       <button
         onClick={detectExpression}
-        className="py-2 px-5 bg-[#333] rounded-xl cursor-pointer hover:bg-[#444] active:scale-95 transition-all duration-150"
+        className="py-2 px-5 bg-primary rounded-xl cursor-pointer hover:bg-primary/85 active:scale-95 transition-all duration-150 whitespace-nowrap"
       >
         {loading ? "Fetching songs..." : "Detect Expression"}
       </button>
-      <h2>
-        {expression
-          ? `Detected Expression: ${expression}`
-          : "Click the button to detect face expression"}
-      </h2>
     </div>
   );
 }

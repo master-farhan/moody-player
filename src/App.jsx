@@ -7,7 +7,7 @@ const App = () => {
   console.log(Songs)
   
   return (
-    <div className="min-h-screen px-[10%] py-10 bg-[#222] text-white">
+    <div className="min-h-screen px-[10%] py-10 bg-[#000000] text-white">
       <FaceDetection Songs={Songs} setSongs={setSongs} />
       <MoodSongs Songs={Songs} setSongs={setSongs} />
     </div>

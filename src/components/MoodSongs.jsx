@@ -29,7 +29,7 @@ const MoodSongs = ({ Songs }) => {
             <p className="text-sm">By {song.artist}</p>
           </div>
           <audio ref={audioRef} src={song.audio} className="hidden" />
-          <button onClick={togglePlay} className="p-2 bg-[#282828] rounded-full">
+          <button onClick={togglePlay} className="p-2 bg-primary rounded-full">
             {isPlaying ? <Pause /> : <Play />}
           </button>
         </div>
